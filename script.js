@@ -11,6 +11,7 @@ form.addEventListener("submit", async (e) => {
   const level = document.getElementById("level").value;
 
   const duration = subject === "Both" ? 60 : 30;
+console.log("Sending to Google Sheet:", { name, subject, level, duration });
 
   await fetch(SHEET_URL, {
     method: "POST",
