@@ -2,7 +2,7 @@ const form = document.getElementById("checkin-form");
 const tableBody = document.querySelector("#student-table tbody");
 
 // Replace this with your Google Apps Script Web App URL:
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbxpe4Mq8ID1ylsgPsGyo9mxO-_b0XO0RinA1icq53J8DcwKGFZH5wBnQlFakgtcZo4z/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbz2XcupdaF3G_gtWj34upZLcQFLSSO1yOd1FFxew8Jse-1BMy6YEC_18v7gv9micbeG/exec";
 
 form.addEventListener("submit", async (e) => {
   e.preventDefault();
