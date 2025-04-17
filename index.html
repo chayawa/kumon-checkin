@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kumon Check-In</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Kumon Center Check-In</h1>
+  <form id="checkin-form">
+    <input type="text" id="name" placeholder="Student Name" required />
+    <select id="subject" required>
+      <option value="">Choose Subject</option>
+      <option value="Math">Math</option>
+      <option value="Reading">Reading</option>
+      <option value="Both">Both</option>
+    </select>
+    <input type="text" id="level" placeholder="Level (e.g. G2)" required />
+    <button type="submit">Check In</button>
+  </form>
+
+  <div id="status-board">
+    <h2>Currently Checked In</h2>
+    <table id="student-table">
+      <thead>
+        <tr><th>Name</th><th>Subject</th><th>Level</th><th>Time In</th><th>Status</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
