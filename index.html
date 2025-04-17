@@ -1,99 +1,102 @@
-
 <!DOCTYPE html>
-
 <html lang="en">
-  
 <head>
   <meta charset="UTF-8">
   <title>Kumon Check-In</title>
-<style>
-  body {
-    font-family: 'Segoe UI', sans-serif;
-    background-color: #f9f9f9;
-    color: #222;
-    margin: 0;
-    padding: 2rem;
-  }
 
-  h1 {
-    color: #73D1F6;
-    font-size: 2rem;
-    margin-bottom: 1rem;
-  }
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f9f9f9;
+      color: #222;
+      margin: 0;
+      padding: 2rem;
+    }
 
-  form {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    margin-bottom: 2rem;
-  }
+    h1 {
+      color: #73D1F6;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+    }
 
-  input, select, button {
-    padding: 0.6rem;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-  }
+    form {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 2rem;
+    }
 
-  button {
-    background-color: #73D1F6;
-    color: white;
-    border: none;
-    cursor: pointer;
-    transition: background 0.2s ease;
-  }
+    input, select, button {
+      padding: 0.6rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
 
-  button:hover {
-    background-color: #5ac5ee;
-  }
+    button {
+      background-color: #73D1F6;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: white;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    border-radius: 10px;
-    overflow: hidden;
-  }
+    button:hover {
+      background-color: #5ac5ee;
+    }
 
-  th, td {
-    padding: 1rem;
-    text-align: left;
-    border-bottom: 1px solid #eee;
-  }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-radius: 10px;
+      overflow: hidden;
+    }
 
-  th {
-    background-color: #73D1F6;
-    color: white;
-  }
+    th, td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid #eee;
+    }
 
-  td:last-child {
-    text-align: center;
-  }
+    th {
+      background-color: #73D1F6;
+      color: white;
+    }
 
-  tr:last-child td {
-    border-bottom: none;
-  }
+    td:last-child {
+      text-align: center;
+    }
 
-  .done-btn {
-    background-color: #ddd;
-    color: #333;
-    font-size: 0.9rem;
-    padding: 0.4rem 0.8rem;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-  }
+    tr:last-child td {
+      border-bottom: none;
+    }
 
-  .done-btn:hover {
-    background-color: #ccc;
-  }
-</style>
+    .done-btn {
+      background-color: #73D1F6;
+      color: white;
+      font-size: 0.85rem;
+      padding: 0.5rem 1rem;
+      border-radius: 999px;
+      border: none;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.1s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .done-btn:hover {
+      background-color: #5abfe7;
+      transform: scale(1.05);
+    }
+  </style>
 
   <script type="module">
-    
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+    import {
+      getFirestore, collection, addDoc, getDocs, serverTimestamp,
+      updateDoc, doc
+    } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyARQlNYkulDymxC9KDeotW6BDIL6V1Wz4w",
@@ -125,7 +128,9 @@
             subject,
             level,
             duration,
-            timeIn: serverTimestamp()
+            timeIn: serverTimestamp(),
+            date: new Date().toLocaleDateString(),
+            done: false
           });
 
           alert("Check-in recorded!");
@@ -142,42 +147,45 @@
         const now = new Date();
 
         const snapshot = await getDocs(collection(db, "checkins"));
-        snapshot.forEach(doc => {
-          const data = doc.data();
+        snapshot.forEach(docSnap => {
+          const data = docSnap.data();
           const timeIn = data.timeIn?.toDate?.() || new Date();
           const minutes = Math.floor((now - timeIn) / 60000);
-          const limit = data.duration;
           let status = "🟢 On Time";
 
-          if (minutes > limit + 10) status = "🔴 Too Long";
-          else if (minutes > limit) status = "🟡 Overtime";
+          if (data.done) {
+            status = "⚫️ Done";
+          } else if (minutes > data.duration + 5) {
+            status = "🔴 Too Long";
+          } else if (minutes >= data.duration) {
+            status = "🟡 Overtime";
+          }
 
-const tr = document.createElement("tr");
-tr.innerHTML = `
-  <td>${data.name}</td>
-  <td>${data.subject}</td>
-  <td>${data.level}</td>
-  <td>${timeIn.toLocaleTimeString()}</td>
-  <td>${status}</td>
-  <td><button data-id="${doc.id}" class="done-btn">Done</button></td>
-`;
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${data.name}</td>
+            <td>${data.subject}</td>
+            <td>${data.level}</td>
+            <td>${timeIn.toLocaleTimeString()}</td>
+            <td>${status}</td>
+            <td>${data.date || ""}</td>
+            <td><button data-id="${docSnap.id}" class="done-btn">Done</button></td>
+          `;
 
-if (status === "⚫️ Done") {
-  tr.style.color = "gray";
-}
-
+          if (data.done) {
+            tr.style.color = "gray";
+          }
 
           tableBody.appendChild(tr);
         });
-          // DONE button functionality
-  document.querySelectorAll(".done-btn").forEach(btn => {
-    btn.addEventListener("click", async () => {
-      const id = btn.getAttribute("data-id");
-      await updateDoc(doc(db, "checkins", id), { done: true });
-      loadData(); // Refresh the table
-    });
-  });
 
+        document.querySelectorAll(".done-btn").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const id = btn.getAttribute("data-id");
+            await updateDoc(doc(db, "checkins", id), { done: true });
+            loadData();
+          });
+        });
       }
 
       loadData();
@@ -209,6 +217,8 @@ if (status === "⚫️ Done") {
         <th>Level</th>
         <th>Time In</th>
         <th>Status</th>
+        <th>Date</th>
+        <th>Action</th>
       </tr>
     </thead>
     <tbody></tbody>
