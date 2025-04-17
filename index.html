@@ -1,35 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Kumon Check-In</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <h1>Kumon Center Check-In</h1>
-  <form id="checkin-form">
-    <input type="text" id="name" placeholder="Student Name" required />
-    <select id="subject" required>
-      <option value="">Choose Subject</option>
-      <option value="Math">Math</option>
-      <option value="Reading">Reading</option>
-      <option value="Both">Both</option>
-    </select>
-    <input type="text" id="level" placeholder="Level (e.g. G2)" required />
-    <button type="submit">Check In</button>
-  </form>
+<!-- Add these to your index.html inside <head> -->
+<script type="module">
+  // Firebase SDKs
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, serverTimestamp, Timestamp } from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
 
-  <div id="status-board">
-    <h2>Currently Checked In</h2>
-    <table id="student-table">
-      <thead>
-        <tr><th>Name</th><th>Subject</th><th>Level</th><th>Time In</th><th>Status</th></tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </div>
+  const firebaseConfig = {
+    apiKey: "AIzaSyARQlNYkulDymxC9KDeotW6BDIL6V1Wz4w",
+    authDomain: "kumon-killarney.firebaseapp.com",
+    projectId: "kumon-killarney",
+    storageBucket: "kumon-killarney.firebasestorage.app",
+    messagingSenderId: "756224618164",
+    appId: "1:756224618164:web:2722e5cd1329e64e88f1e1"
+  };
 
-  <script src="script.js"></script>
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const form = document.getElementById("checkin-form");
+  const tableBody = document.querySelector("#student-table tbody");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const name = document.getElementById("name").value;
+    const subject = document.getElementById("subject").value;
+    const level = document.getElementById("level").value;
+    const duration = subject === "Both" ? 60 : 30;
+
+    try {
+      await addDoc(collection(db, "checkins"), {
+        name,
+        subject,
+        level,
+        duration,
+        timeIn: serverTimestamp()
+      });
+
+      alert("Check-in recorded!");
+      form.reset();
+      loadData();
+    } catch (err) {
+      console.error("Error saving to Firestore:", err);
+      alert("Failed to save check-in.");
+    }
+  });
+
+  async function loadData() {
+    tableBody.innerHTML = "";
+    const now = new Date();
+
+    const snapshot = await getDocs(collection(db, "checkins"));
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const timeIn = data.timeIn?.toDate?.() || new Date(); // fallback if timestamp not loaded
+      const minutes = Math.floor((now - timeIn) / 60000);
+      const statusLimit = data.duration;
+      let status = "🟢 On Time";
+
+      if (minutes > statusLimit + 10) status = "🔴 Too Long";
+      else if (minutes > statusLimit) status = "🟡 Overtime";
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${data.name}</td>
+        <td>${data.subject}</td>
+        <td>${data.level}</td>
+        <td>${timeIn.toLocaleTimeString()}</td>
+        <td>${status}</td>
+      `;
+      tableBody.appendChild(tr);
+    });
+  }
+
+  loadData();
+  setInterval(loadData, 60000); // Refresh every minute
+</script>
+
 </body>
 </html>
