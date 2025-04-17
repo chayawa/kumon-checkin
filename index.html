@@ -1,4 +1,10 @@
+
 <!DOCTYPE html>
+import {
+  getFirestore, collection, addDoc, getDocs, serverTimestamp,
+  updateDoc, doc
+} from "https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore.js";
+
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -64,16 +70,32 @@
           if (minutes > limit + 10) status = "🔴 Too Long";
           else if (minutes > limit) status = "🟡 Overtime";
 
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
-            <td>${data.name}</td>
-            <td>${data.subject}</td>
-            <td>${data.level}</td>
-            <td>${timeIn.toLocaleTimeString()}</td>
-            <td>${status}</td>
-          `;
+const tr = document.createElement("tr");
+tr.innerHTML = `
+  <td>${data.name}</td>
+  <td>${data.subject}</td>
+  <td>${data.level}</td>
+  <td>${timeIn.toLocaleTimeString()}</td>
+  <td>${status}</td>
+  <td><button data-id="${doc.id}" class="done-btn">Done</button></td>
+`;
+
+if (status === "⚫️ Done") {
+  tr.style.color = "gray";
+}
+
+
           tableBody.appendChild(tr);
         });
+          // DONE button functionality
+  document.querySelectorAll(".done-btn").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      const id = btn.getAttribute("data-id");
+      await updateDoc(doc(db, "checkins", id), { done: true });
+      loadData(); // Refresh the table
+    });
+  });
+
       }
 
       loadData();
