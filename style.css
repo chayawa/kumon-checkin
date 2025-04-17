@@ -1,0 +1,17 @@
+body {
+  font-family: sans-serif;
+  padding: 2rem;
+}
+form input, form select {
+  margin: 0.5rem;
+  padding: 0.5rem;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+th, td {
+  border: 1px solid #ddd;
+  padding: 0.5rem;
+}
