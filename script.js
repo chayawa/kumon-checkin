@@ -1,4 +1,4 @@
-const SHEET_URL = "https://script.google.com/macros/s/AKfycbxq0CNFc6DFHc1RsI-k_6HXCsH-POVs4Q88UJM2NhADBgLM55RPxDQpquJs4F09sUYi/exec";
+const SHEET_URL = "https://script.google.com/macros/s/AKfycbx-1T_3cvK-dk4g40qaeJlDl5XTT5TVsQY0yfZydCIM5zVBAE-WEE4UcvyikDahK-pQ/exec";
 
 const form = document.getElementById("checkin-form");
 const tableBody = document.querySelector("#student-table tbody");
